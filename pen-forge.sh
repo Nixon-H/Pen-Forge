@@ -718,7 +718,7 @@ elif grep -qi "ubuntu" /etc/os-release; then OS_ID="ubuntu";
 else OS_ID=$(grep -oP '^ID=\K\w+' /etc/os-release); fi
 fi
 case "$OS_ID" in
-kali|ubuntu|parrot) echo -e "${GREEN}[+] Detected $OS_ID.${NC}" ;;
+kali|ubuntu|parrot|debian) echo -e "${GREEN}[+] Detected $OS_ID.${NC}" ;;
 *) echo -e "${RED}[x] Unsupported OS: '${OS_ID:-unknown}'. Aborting.${NC}"; exit 1 ;;
 esac
 export OS_ID
@@ -769,7 +769,9 @@ STOP_SPINNER
 printf "${GREEN}[+] System updated successfully: %s seconds${NC}\n" "$TIME"
 rm -f "$LOG_FILE"
 echo -e "${YELLOW}[*] Installing prerequisite packages...${NC}"
-if [ "$OS_ID" == "parrot" ]; then
+if [ "$OS_ID" == "debian" ]; then
+PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake libtool autoconf automake libssl-dev libpcre2-dev rsync net-tools dmidecode python3-pip python3-setuptools python3 dos2unix xsel jq yq npm pkg-config parallel cewl perl chromium masscan sqlmap sublist3r ruby ruby-dev psmisc bc libudev1)
+elif [ "$OS_ID" == "parrot" ]; then
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake libtool autoconf automake libssl-dev libpcre3-dev rsync net-tools dmidecode python3-pip dos2unix xsel jq yq npm pkg-config parallel cewl perl chromium masscan sqlmap sublist3r ruby ruby-dev psmisc bc libudev1)
 elif [ "$OS_ID" == "kali" ]; then
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake libtool autoconf automake libssl-dev libpcre3-dev rsync net-tools dmidecode python3-pip dos2unix xsel jq yq npm pkg-config libudev-dev parallel cewl perl chromium masscan sqlmap sublist3r ruby ruby-dev psmisc bc)
@@ -991,7 +993,7 @@ install_tool "Hakrawler" "hakrawler" "go install github.com/hakluke/hakrawler@la
 install_tool "Hakrevdns" "hakrevdns" "go install github.com/hakluke/hakrevdns@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Haktrails" "haktrails" "go install github.com/hakluke/haktrails@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Haktrailsfree" "haktrailsfree" "go install github.com/rix4uni/haktrailsfree@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Httpx" "httpx" "go install github.com/projectdiscovery/httpx/cmd/httpx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
+install_tool "Httpx" "httpx-toolkit" "go install github.com/projectdiscovery/httpx/cmd/httpx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Httprobe" "httprobe" "go install github.com/tomnomnom/httprobe@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Interactsh-client" "interactsh-client" "go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Ip2org" "ip2org" "go install github.com/rix4uni/ip2org@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
@@ -1209,7 +1211,7 @@ elif grep -qi "ubuntu" /etc/os-release; then OS_ID="ubuntu";
 else OS_ID=$(grep -oP '^ID=\K\w+' /etc/os-release); fi
 fi
 case "$OS_ID" in
-kali|ubuntu|parrot) echo -e "${GREEN}[+] Detected $OS_ID.${NC}" ;;
+kali|ubuntu|parrot|debian) echo -e "${GREEN}[+] Detected $OS_ID.${NC}" ;;
 *) echo -e "${RED}[x] Unsupported OS: '${OS_ID:-unknown}'. Cannot set up prerequisites.${NC}"; exit 1 ;;
 esac
 export OS_ID
@@ -1239,7 +1241,9 @@ fi
 STOP_SPINNER; printf "${GREEN}[+] System package lists updated: %s seconds${NC}\n" "$TIME"
 rm -f "$UPDATE_LOG"
 echo -e "${YELLOW}[*] Installing critical prerequisite packages...${NC}"
-if [ "$OS_ID" == "parrot" ]; then
+if [ "$OS_ID" == "debian" ]; then
+PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake python3-pip python3-setuptools python3 dos2unix jq npm pkg-config libudev1 psmisc bc)
+elif [ "$OS_ID" == "parrot" ]; then
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake python3-pip dos2unix jq npm pkg-config libudev1 psmisc bc)
 else
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake python3-pip dos2unix jq npm pkg-config libudev-dev psmisc bc)
@@ -1928,6 +1932,10 @@ fi
 STOP_SPINNER
 local OS_ID
 OS_ID=$(grep -E '^ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+if [ "$OS_ID" == "debian" ]; then
+PACKAGES_TO_UNINSTALL=(libpcap-dev libssl-dev libpcre2-dev python3-setuptools pkg-config parallel ruby-dev cmake libtool autoconf automake psmisc dos2unix xsel yq npm cewl)
+PACKAGES_TO_UNINSTALL+=(libudev1)
+else
 PACKAGES_TO_UNINSTALL=(libpcap-dev libssl-dev libpcre3-dev pkg-config parallel ruby-dev cmake libtool autoconf automake psmisc dos2unix xsel yq npm cewl)
 [[ "$OS_ID" == "parrot" ]] && PACKAGES_TO_UNINSTALL+=(libudev1) || PACKAGES_TO_UNINSTALL+=(libudev-dev)
 dpkg -s sublist3r &>/dev/null && PACKAGES_TO_UNINSTALL+=(sublist3r)
