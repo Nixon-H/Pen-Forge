@@ -1966,6 +1966,7 @@ START_SPINNER "Running apt autoremove and clean"
 sudo DEBIAN_FRONTEND=noninteractive apt-get autoremove -y --purge &>> "$UNINSTALL_LOG_FILE" && sudo DEBIAN_FRONTEND=noninteractive apt-get clean &>> "$UNINSTALL_LOG_FILE"
 STOP_SPINNER
 echo "[+] Prerequisite packages cleaned."
+fi
 msg "Cleanup and reconfiguration finished!"
 echo -e "${GREEN}[*]${NC} ${CYAN}Full uninstall log is available at: ${UNINSTALL_LOG_FILE}${NC}"
 trap - INT TERM
