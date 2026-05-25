@@ -35,6 +35,7 @@ if [[ -n "${SPINNER_PID:-}" ]] && kill -0 "$SPINNER_PID" 2>/dev/null; then
 kill -9 "$SPINNER_PID" 2>/dev/null || true
 wait "$SPINNER_PID" 2>/dev/null || true
 fi
+sudo kill -9 $(pgrep -f "apt-get" 2>/dev/null) 2>/dev/null || true
 find /tmp -maxdepth 1 -name 'sorted_tools.tmp.*' -type f -user "$(id -u)" -delete 2>/dev/null || true
 find /tmp -maxdepth 1 -name 'tmp.*' -type f -user "$(id -u)" -delete 2>/dev/null || true
 exit 0
@@ -57,6 +58,7 @@ if [[ -n "${SPINNER_PID:-}" ]] && kill -0 "$SPINNER_PID" 2>/dev/null; then
 kill -9 "$SPINNER_PID" 2>/dev/null || true
 wait "$SPINNER_PID" 2>/dev/null || true
 fi
+sudo kill -9 $(pgrep -f "apt-get" 2>/dev/null) 2>/dev/null || true
 find /tmp -maxdepth 1 -name 'sorted_tools.tmp.*' -type f -user "$(id -u)" -delete 2>/dev/null || true
 find /tmp -maxdepth 1 -name 'tmp.*' -type f -user "$(id -u)" -delete 2>/dev/null || true
 if [[ $exit_code -ne 0 && $exit_code -ne 130 && $exit_code -ne 148 ]]; then
@@ -754,20 +756,24 @@ fi
 }
 handle_apt_locks
 echo -e "${YELLOW}[*] Cleaning, updating, and upgrading system packages...${NC}"
-LOG_FILE=$(mktemp)
 START_SPINNER "Updating system (apt update, upgrade)"
+APT_LOG_FILE=$(mktemp)
 if ! (sudo DEBIAN_FRONTEND=noninteractive apt-get clean && \
-sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
-sudo DEBIAN_FRONTEND=noninteractive apt-get --fix-broken install -y -qq && \
-sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y -qq) &> "$LOG_FILE"; then
+sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get update && \
+sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get --fix-broken install -y && \
+sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get dist-upgrade -y) &> "$APT_LOG_FILE"; then
 STOP_SPINNER
-printf "${RED}[x] System update FAILED: %s seconds${NC}\n" "$TIME"
-echo -e "${YELLOW}--- Last 30 lines of log for System Update ---${NC}"; tail -30 "$LOG_FILE"; echo -e "${YELLOW}---------------------------------${NC}"
-rm -f "$LOG_FILE"; exit 1
+printf "${RED}[x] System update FAILED after %s seconds${NC}\n" "$TIME"
+echo ""; echo -e "${YELLOW}--- Full log for System Update ---${NC}"
+cat "$APT_LOG_FILE"
+echo -e "${YELLOW}---------------------------------${NC}"
+rm -f "$APT_LOG_FILE"
+echo -e "${YELLOW}[*] Try manually: sudo apt update && sudo apt dist-upgrade -y${NC}"
+exit 1
 fi
+rm -f "$APT_LOG_FILE"
 STOP_SPINNER
 printf "${GREEN}[+] System updated successfully: %s seconds${NC}\n" "$TIME"
-rm -f "$LOG_FILE"
 echo -e "${YELLOW}[*] Installing prerequisite packages...${NC}"
 if [ "$OS_ID" == "debian" ]; then
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake libtool autoconf automake libssl-dev libpcre2-dev rsync net-tools dmidecode python3-pip python3-setuptools python3 dos2unix xsel jq yq npm pkg-config parallel cewl perl chromium masscan sqlmap sublist3r ruby ruby-dev psmisc bc libudev1)
@@ -788,11 +794,15 @@ if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
 echo "[*] Installing missing prerequisites: ${missing_pkgs[*]}"
 START_SPINNER "Installing ${#missing_pkgs[@]} prerequisites"
 PKG_LOG_FILE=$(mktemp)
-if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${missing_pkgs[@]}" &> "$PKG_LOG_FILE"; then
+if ! timeout 600 bash -c "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \"${missing_pkgs[@]}\"" &> "$PKG_LOG_FILE"; then
 STOP_SPINNER
-printf "${RED}[x] Failed to install prerequisites: %s seconds${NC}\n" "$TIME"
-echo -e "${YELLOW}--- Last 30 lines of log for Prerequisite Install ---${NC}"; tail -30 "$PKG_LOG_FILE"; echo -e "${YELLOW}---------------------------------${NC}"
-rm -f "$PKG_LOG_FILE"; exit 1
+printf "${RED}[x] Failed to install prerequisites after %s seconds${NC}\n" "$TIME"
+echo ""; echo -e "${YELLOW}--- Full log for Prerequisite Install ---${NC}"
+cat "$PKG_LOG_FILE"
+echo -e "${YELLOW}---------------------------------${NC}"
+rm -f "$PKG_LOG_FILE"
+echo -e "${YELLOW}[*] Try installing individually: sudo apt install -y ${missing_pkgs[*]}${NC}"
+exit 1
 fi
 STOP_SPINNER
 printf "${GREEN}[+] Prerequisites installed successfully: %s seconds${NC}\n" "$TIME"
