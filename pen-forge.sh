@@ -745,19 +745,14 @@ echo -e "${GREEN}[+] SECTION 1: Preparing System & Package Manager...${NC}"
 echo "=================================================================="
 handle_apt_locks() {
 echo "[*] Checking for existing apt locks..."; sudo apt-get install -y -qq psmisc &>/dev/null || true
-if sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || sudo lsof /var/lib/dpkg/lock >/dev/null 2>&1; then
-echo -e "${YELLOW}[~] Apt lock detected. Attempting to resolve automatically...${NC}"
 sudo killall -9 apt apt-get dpkg 2>/dev/null || true
 sudo rm -f /var/lib/apt/lists/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
 if ! timeout 120 sudo dpkg --configure -a; then
-echo -e "${RED}[x] dpkg --configure -a timed out or failed after 2 minutes.${NC}"
+echo -e "${RED}[x] dpkg --configure -a failed.${NC}"
 echo -e "${YELLOW}[*] Try manually: sudo killall apt apt-get dpkg && sudo rm -f /var/lib/apt/lists/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend && sudo dpkg --configure -a${NC}"
 exit 1
 fi
-echo -e "${GREEN}[+] Apt lock resolution attempted.${NC}"
-else
 echo -e "${GREEN}[+] Apt lock free.${NC}"
-fi
 }
 handle_apt_locks
 echo -e "${YELLOW}[*] Cleaning, updating, and upgrading system packages...${NC}"
