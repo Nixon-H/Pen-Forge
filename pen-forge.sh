@@ -754,7 +754,7 @@ fi
 }
 handle_apt_locks
 echo -e "${YELLOW}[*] Cleaning, updating, and upgrading system packages...${NC}"
-local LOG_FILE; LOG_FILE=$(mktemp)
+LOG_FILE=$(mktemp)
 START_SPINNER "Updating system (apt update, upgrade)"
 if ! (sudo DEBIAN_FRONTEND=noninteractive apt-get clean && \
 sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
@@ -787,7 +787,7 @@ done
 if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
 echo "[*] Installing missing prerequisites: ${missing_pkgs[*]}"
 START_SPINNER "Installing ${#missing_pkgs[@]} prerequisites"
-local PKG_LOG_FILE; PKG_LOG_FILE=$(mktemp)
+PKG_LOG_FILE=$(mktemp)
 if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${missing_pkgs[@]}" &> "$PKG_LOG_FILE"; then
 STOP_SPINNER
 printf "${RED}[x] Failed to install prerequisites: %s seconds${NC}\n" "$TIME"
@@ -819,9 +819,9 @@ echo -e "${CYAN}[*] Current swap: ${current_swap_gb}GB. Target: ${TARGET_SWAP_GB
 if [ "$current_swap_kb" -lt "$((required_swap_kb * 95 / 100))" ]; then
 echo -e "${YELLOW}[~] Active swap is insufficient. Creating a new swap file...${NC}"
 FS_TYPE=$(findmnt -n -o FSTYPE /)
-local SWAP_FILE_PATH="/swapfile"
+SWAP_FILE_PATH="/swapfile"
 START_SPINNER "Creating ${TARGET_SWAP_GB}GB swap file on '$FS_TYPE' filesystem"
-local SWAP_LOG_FILE; SWAP_LOG_FILE=$(mktemp)
+SWAP_LOG_FILE=$(mktemp)
 sudo swapoff -a &>> "$SWAP_LOG_FILE" || true
 sudo rm -f /swapfile &>> "$SWAP_LOG_FILE" || true
 if [ -d /swap ]; then
@@ -1636,12 +1636,10 @@ done
 echo "[+] Attempted to uninstall pipx tools via pipx command."
 echo "[*] Cleaning up potential leftover symlinks/files in ~/.local/bin/ for toolkit tools..."
 for tool in "${PYTHON_PIPX_TOOLS[@]}"; do
-    
-    # --- ADD THESE LINES ---
+
     local potential_names=("$tool")
     local mapped_name="${BINARY_NAME_MAP[$tool]}"
     [[ -n "$mapped_name" ]] && potential_names+=("$mapped_name")
-    # --- END ADD ---
 
 for name_variant in "${potential_names[@]}"; do
 local link_path="$HOME/.local/bin/$name_variant"
@@ -1801,7 +1799,7 @@ sudo chmod 600 "$SWAP_PATH" &>> "$LOG_FILE" || { STOP_SPINNER; echo "${RED}[x] F
 if ! sudo mkswap "$SWAP_PATH" &>> "$LOG_FILE"; then STOP_SPINNER; echo "${RED}[x] mkswap failed.${NC}"; cat "$LOG_FILE"; return 1; fi
 if ! sudo swapon "$SWAP_PATH" &>> "$LOG_FILE"; then STOP_SPINNER; echo "${RED}[x] swapon failed.${NC}"; cat "$LOG_FILE"; return 1; fi
 STOP_SPINNER
-sleep 0.1 # <--- ADD THIS LINE
+sleep 0.1
 echo "[*] Adding swap entry to /etc/fstab..."
 if ! grep -qF "\"$SWAP_PATH\" none swap" /etc/fstab; then
 echo "\"$SWAP_PATH\" none swap sw 0 0" | sudo tee -a /etc/fstab > /dev/null
