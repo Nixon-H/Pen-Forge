@@ -759,14 +759,20 @@ echo -e "${GREEN}[+] Apt lock free.${NC}"
 }
 handle_apt_locks
 echo -e "${YELLOW}[*] Cleaning, updating, and upgrading system packages...${NC}"
+START_SPINNER "Updating system (apt update, upgrade)"
 if ! (sudo DEBIAN_FRONTEND=noninteractive apt-get clean && \
 sudo DEBIAN_FRONTEND=noninteractive apt-get update && \
 sudo DEBIAN_FRONTEND=noninteractive apt-get --fix-broken install -y && \
-sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y); then
+sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y) &>/tmp/pen-forge-apt.log; then
+STOP_SPINNER
 printf "${RED}[x] System update FAILED${NC}\n"
+echo ""; echo -e "${YELLOW}--- apt output ---${NC}"
+cat /tmp/pen-forge-apt.log 2>/dev/null
+echo -e "${YELLOW}-----------------${NC}"
 echo -e "${YELLOW}[*] Try manually: sudo apt update && sudo apt dist-upgrade -y${NC}"
 exit 1
 fi
+STOP_SPINNER
 printf "${GREEN}[+] System updated successfully${NC}\n"
 echo -e "${YELLOW}[*] Installing prerequisite packages...${NC}"
 if [ "$OS_ID" == "debian" ]; then
@@ -786,11 +792,19 @@ fi
 done
 if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
 echo "[*] Installing missing prerequisites: ${missing_pkgs[*]}"
-if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing_pkgs[@]}"; then
+START_SPINNER "Installing ${#missing_pkgs[@]} prerequisites"
+PKG_LOG_FILE=$(mktemp)
+if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing_pkgs[@]}" &> "$PKG_LOG_FILE"; then
+STOP_SPINNER
 printf "${RED}[x] Failed to install prerequisites after %s seconds${NC}\n" "$TIME"
-echo -e "${YELLOW}[*] Try installing individually: sudo apt install -y ${missing_pkgs[*]}${NC}"
+echo ""; echo -e "${YELLOW}--- Prerequisite install output ---${NC}"
+cat "$PKG_LOG_FILE"
+echo -e "${YELLOW}------------------------------------${NC}"
+rm -f "$PKG_LOG_FILE"
+echo -e "${YELLOW}[*] Try manually: sudo apt install -y ${missing_pkgs[*]}${NC}"
 exit 1
 fi
+STOP_SPINNER
 printf "${GREEN}[+] Prerequisites installed successfully: %s seconds${NC}\n" "$TIME"
 rm -f "$PKG_LOG_FILE"
 else
