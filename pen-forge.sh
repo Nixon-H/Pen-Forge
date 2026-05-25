@@ -759,24 +759,15 @@ echo -e "${GREEN}[+] Apt lock free.${NC}"
 }
 handle_apt_locks
 echo -e "${YELLOW}[*] Cleaning, updating, and upgrading system packages...${NC}"
-START_SPINNER "Updating system (apt update, upgrade)"
-APT_LOG_FILE=$(mktemp)
 if ! (sudo DEBIAN_FRONTEND=noninteractive apt-get clean && \
-sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get update && \
-sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get --fix-broken install -y && \
-sudo DEBIAN_FRONTEND=noninteractive timeout 600 apt-get dist-upgrade -y) &> "$APT_LOG_FILE"; then
-STOP_SPINNER
-printf "${RED}[x] System update FAILED after %s seconds${NC}\n" "$TIME"
-echo ""; echo -e "${YELLOW}--- Full log for System Update ---${NC}"
-cat "$APT_LOG_FILE"
-echo -e "${YELLOW}---------------------------------${NC}"
-rm -f "$APT_LOG_FILE"
+sudo DEBIAN_FRONTEND=noninteractive apt-get update && \
+sudo DEBIAN_FRONTEND=noninteractive apt-get --fix-broken install -y && \
+sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y); then
+printf "${RED}[x] System update FAILED${NC}\n"
 echo -e "${YELLOW}[*] Try manually: sudo apt update && sudo apt dist-upgrade -y${NC}"
 exit 1
 fi
-rm -f "$APT_LOG_FILE"
-STOP_SPINNER
-printf "${GREEN}[+] System updated successfully: %s seconds${NC}\n" "$TIME"
+printf "${GREEN}[+] System updated successfully${NC}\n"
 echo -e "${YELLOW}[*] Installing prerequisite packages...${NC}"
 if [ "$OS_ID" == "debian" ]; then
 PACKAGES=(build-essential libpcap-dev pipx unzip wget git curl cmake libtool autoconf automake libssl-dev libpcre2-dev rsync net-tools dmidecode python3-pip python3-setuptools python3 dos2unix xsel jq yq npm pkg-config parallel cewl perl chromium masscan sqlmap sublist3r ruby ruby-dev psmisc bc libudev1)
@@ -795,19 +786,11 @@ fi
 done
 if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
 echo "[*] Installing missing prerequisites: ${missing_pkgs[*]}"
-START_SPINNER "Installing ${#missing_pkgs[@]} prerequisites"
-PKG_LOG_FILE=$(mktemp)
-if ! timeout 600 bash -c "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \"${missing_pkgs[@]}\"" &> "$PKG_LOG_FILE"; then
-STOP_SPINNER
+if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing_pkgs[@]}"; then
 printf "${RED}[x] Failed to install prerequisites after %s seconds${NC}\n" "$TIME"
-echo ""; echo -e "${YELLOW}--- Full log for Prerequisite Install ---${NC}"
-cat "$PKG_LOG_FILE"
-echo -e "${YELLOW}---------------------------------${NC}"
-rm -f "$PKG_LOG_FILE"
 echo -e "${YELLOW}[*] Try installing individually: sudo apt install -y ${missing_pkgs[*]}${NC}"
 exit 1
 fi
-STOP_SPINNER
 printf "${GREEN}[+] Prerequisites installed successfully: %s seconds${NC}\n" "$TIME"
 rm -f "$PKG_LOG_FILE"
 else
