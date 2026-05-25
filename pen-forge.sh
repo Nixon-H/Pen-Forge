@@ -340,7 +340,6 @@ local actual_binary="${BINARY_NAME_MAP["$check_key"]}"
 check_command="$actual_binary"
 fi
 local max_attempts=3
-local -r TOOL_INSTALL_TIMEOUT=900
 local LOG_FILE=""
 trap '[[ -n "$LOG_FILE" ]] && rm -f "$LOG_FILE" 2>/dev/null' RETURN
 local tool_exists=false
@@ -408,7 +407,7 @@ env_setup+=" \
 export GOMEMLIMIT='2GiB'; \
 export GOFLAGS='-buildvcs=false';"
 echo "[DEBUG] $(date): Running command for $display_name: $env_setup $install_command" >> /tmp/pen-forge-install.log
-timeout --signal=INT --kill-after=10s "$TOOL_INSTALL_TIMEOUT" bash -c "
+bash -c "
 trap 'echo \"[DEBUG SUB] Received INT, exiting with 130\" >> /tmp/pen-forge-install.log; exit 130' INT
 err_report() {
 local err_code=\$?
@@ -473,10 +472,7 @@ tool_found_after=true
 fi
 fi
 local install_failed=false
-if [ "$EXIT_CODE" -eq 124 ]; then
-printf "${RED}[x] %-25s - FAILED: TIMEOUT (>${TOOL_INSTALL_TIMEOUT}s)${NC}\n" "$display_name"
-install_failed=true
-elif [ "$EXIT_CODE" -eq 0 ] && $tool_found_after; then
+if [ "$EXIT_CODE" -eq 0 ] && $tool_found_after; then
 printf "${GREEN}[+] %-25s - INSTALLED: %s seconds${NC}\n" "$display_name" "$TIME"
 trap - RETURN; rm -f "$LOG_FILE" 2>/dev/null; return 0
 else
