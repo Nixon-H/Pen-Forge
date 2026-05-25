@@ -22,7 +22,7 @@ declare -gA BINARY_NAME_MAP=(
 ["gxss"]="Gxss"
 ["uforall"]="UForAll"
 ["wcvs"]="Web-Cache-Vulnerability-Scanner"
-["getjs"]="GetJS"
+["getjs"]="getJS"
 )
 menu_cleanup() {
 $CLEANUP_RUNNING && exit 0
@@ -210,7 +210,7 @@ declare -A TOOLS_DB=(
 ["sublist3r"]="vuln-scan|Sublist3r|sudo apt-get install -y sublist3r|Subdomain enumeration tool|Subdomains from various search engines"
 ["getjs"]="js-analysis|GetJS|go install github.com/003random/getJS/v2@latest|Extract JavaScript files|All JS files, endpoints in code"
 ["jsfinder"]="js-analysis|Jsfinder|go install github.com/kacakb/jsfinder@latest|Find endpoints in JavaScript|API endpoints, hidden URLs from JS"
-["jsubfinder"]="js-analysis|Jsubfinder|( rm -rf \"$HOME/build-temp/jsubfinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/ThreatUnknown/jsubfinder.git \"$HOME/build-temp/jsubfinder\" && cd \"$HOME/build-temp/jsubfinder\" && sed -i 's|module github.com/ThreatUnkown/jsubfinder|module github.com/ThreatUnknown/jsubfinder|' go.mod && go build -o \"\$GOPATH/bin/jsubfinder\" . )|Find subdomains in JavaScript|Subdomains hardcoded in JS"
+["jsubfinder"]="js-analysis|Jsubfinder|( rm -rf \"$HOME/build-temp/jsubfinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/ThreatUnknown/jsubfinder.git \"$HOME/build-temp/jsubfinder\" && cd \"$HOME/build-temp/jsubfinder\" && go build -o \"\$GOPATH/bin/jsubfinder\" . )|Find subdomains in JavaScript|Subdomains hardcoded in JS"
 ["jsluice"]="js-analysis|Jsluice|go install github.com/BishopFox/jsluice/cmd/jsluice@latest|Extract secrets from JavaScript|API endpoints, tokens, config data"
 ["subjs"]="js-analysis|Subjs|go install github.com/lc/subjs@latest|Extract subdomains from JavaScript|Referenced subdomains in JS code"
 ["linkfinder"]="js-analysis|LinkFinder|( command -v pip3 >/dev/null && rm -rf \"$HOME/build-temp/LinkFinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/GerbenJavado/LinkFinder.git \"$HOME/build-temp/LinkFinder\" && cd \"$HOME/build-temp/LinkFinder\" && pip3 install -r requirements.txt --break-system-packages && chmod +x linkfinder.py && sudo rm -f /usr/local/bin/linkfinder && sudo cp linkfinder.py /usr/local/bin/linkfinder )|Find endpoints in JavaScript|URLs and endpoints in JS code"
@@ -338,6 +338,9 @@ local check_key="${check_command,,}"
 if [[ -n "$check_command" ]] && [[ -v BINARY_NAME_MAP["$check_key"] ]]; then
 local actual_binary="${BINARY_NAME_MAP["$check_key"]}"
 check_command="$actual_binary"
+fi
+if [[ "${FORCE_UPDATE:-false}" == true ]] && [[ "$install_command" == pipx\ install* ]]; then
+install_command="${install_command/pipx install/pipx install --force}"
 fi
 local max_attempts=3
 local LOG_FILE=""
