@@ -935,7 +935,15 @@ STOP_SPINNER
 printf "${GREEN}[+] Go module cache cleaned: %s seconds${NC}\n" "$TIME"
 TOOL_COUNTER=0
 for key in "${!TOOLS_DB[@]}"; do
-    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    entry="${TOOLS_DB[$key]}"
+    category="${entry%%|*}"
+    rest="${entry#*|}"
+    display="${rest%%|*}"
+    rest="${rest#*|}"
+    long="${rest##*|}"
+    rest="${rest%|*}"
+    desc="${rest##*|}"
+    cmd="${rest%|*}"
     if [[ "$cmd" == go\ install* ]]; then
         install_tool "$display" "$key" "$cmd" && TOOL_COUNTER=$((TOOL_COUNTER+1))
         if (( TOOL_COUNTER % 20 == 0 )); then
@@ -947,7 +955,15 @@ echo ""; echo "=================================================================
 echo -e "${GREEN}[+] SECTION 4: Installing Python tools (pipx/pip3)...${NC}"
 echo "=================================================================="
 for key in "${!TOOLS_DB[@]}"; do
-    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    entry="${TOOLS_DB[$key]}"
+    category="${entry%%|*}"
+    rest="${entry#*|}"
+    display="${rest%%|*}"
+    rest="${rest#*|}"
+    long="${rest##*|}"
+    rest="${rest%|*}"
+    desc="${rest##*|}"
+    cmd="${rest%|*}"
     if [[ "$cmd" == pipx* ]] || [[ "$cmd" == pip3* ]]; then
         install_tool "$display" "$key" "$cmd"
     fi
@@ -965,7 +981,15 @@ source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 fi
 for key in "${!TOOLS_DB[@]}"; do
-    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    entry="${TOOLS_DB[$key]}"
+    category="${entry%%|*}"
+    rest="${entry#*|}"
+    display="${rest%%|*}"
+    rest="${rest#*|}"
+    long="${rest##*|}"
+    rest="${rest%|*}"
+    desc="${rest##*|}"
+    cmd="${rest%|*}"
     if [[ "$cmd" != go\ install* ]] && [[ "$cmd" != pipx* ]] && [[ "$cmd" != pip3* ]]; then
         install_tool "$display" "$key" "$cmd" || :
     fi
@@ -1276,11 +1300,14 @@ fi
 for i in "${!tool_keys_sorted[@]}"; do
 local tool_key="${tool_keys_sorted[$i]}"
 if [[ -v TOOLS_DB["$tool_key"] ]]; then
-local name short_desc long_desc
-local data="${TOOLS_DB["$tool_key"]}"
-local name=$(echo "$data" | cut -d'|' -f2)
-local short_desc=$(echo "$data" | cut -d'|' -f4)
-local long_desc=$(echo "$data" | cut -d'|' -f5)
+    local name short_desc long_desc
+    local data="${TOOLS_DB["$tool_key"]}"
+    local long_desc="${data##*|}"
+    local rest="${data%|*}"
+    local short_desc="${rest##*|}"
+    local rest="${rest%|*}"
+    local rest="${rest#*|}"
+    local name="${rest%%|*}"
 printf "%2d. %-20s\n" $((i+1)) "${name:-Unknown}"
 echo "        Purpose: ${short_desc:-N/A}"
 echo "        Finds: ${long_desc:-N/A}"
@@ -1404,11 +1431,14 @@ sleep 2
 return
 fi
 local data="${TOOLS_DB["$tool_key"]}"
-local category=$(echo "$data" | cut -d'|' -f1)
-local name=$(echo "$data" | cut -d'|' -f2)
-local cmd=$(echo "$data" | cut -d'|' -f3)
-local short_desc=$(echo "$data" | cut -d'|' -f4)
-local long_desc=$(echo "$data" | cut -d'|' -f5)
+local category="${data%%|*}"
+local rest="${data#*|}"
+local name="${rest%%|*}"
+local rest="${rest#*|}"
+local long_desc="${rest##*|}"
+local rest="${rest%|*}"
+local short_desc="${rest##*|}"
+local cmd="${rest%|*}"
 if [[ -z "$name" ]] || [[ -z "$cmd" ]]; then
 echo -e "${RED}[x] Failed to parse tool data for key: $tool_key${NC}"
 echo "Check TOOLS_DB format near this entry."
