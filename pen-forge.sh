@@ -171,7 +171,7 @@ declare -A TOOLS_DB=(
 ["gitleaks"]="secrets|Gitleaks|go install github.com/zricethezav/gitleaks/v8@latest|Scan git repos for secrets|Exposed secrets, API keys, tokens"
 ["trufflehog"]="secrets|Trufflehog|curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b \"$HOME/Tools/Go-Tools/bin\"|Scan for secrets in multiple sources|AWS keys, DB creds, tokens"
 ["cariddi"]="secrets|Cariddi|go install github.com/edoardottt/cariddi/cmd/cariddi@latest|Find sensitive data during crawling|Passwords, API keys, emails, paths"
-["gitrepoenum"]="secrets|Gitrepoenum|go install github.com/rix4uni/gitrepoenum@latest|Enumerate .git repositories on a domain|Exposed .git directories"
+["gitxpose"]="secrets|Gitxpose|go install github.com/rix4uni/gitxpose@latest|Enumerate .git repositories on a domain|Exposed .git directories"
 ["goop"]="secrets|Goop|go install github.com/deletescape/goop@latest|Search for exposed .git directories|Exposed .git directories"
 ["dotgit"]="secrets|Dotgit|pipx install dotgit|Extract .git repositories|Source code from exposed .git folders"
 ["hakcheckurl"]="auth-test|Hakcheckurl|go install github.com/hakluke/hakcheckurl@latest|Check URL validity and response codes|Valid endpoints, 401/403 auth issues"
@@ -969,7 +969,7 @@ install_tool "GetJS" "getJS" "go install github.com/003random/getJS/v2@latest" &
 install_tool "Gf" "gf" "go install github.com/tomnomnom/gf@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Github-endpoints" "github-endpoints" "go install github.com/gwen001/github-endpoints@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Github-subdomains" "github-subdomains" "go install github.com/gwen001/github-subdomains@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gitrepoenum" "gitrepoenum" "go install github.com/rix4uni/gitrepoenum@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
+install_tool "Gitxpose" "gitxpose" "go install github.com/rix4uni/gitxpose@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Gitleaks" "gitleaks" "go install github.com/zricethezav/gitleaks/v8@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Gobuster" "gobuster" "go install github.com/OJ/gobuster/v3@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
 install_tool "Goaltdns" "goaltdns" "go install github.com/subfinder/goaltdns@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
