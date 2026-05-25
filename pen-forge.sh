@@ -750,7 +750,7 @@ echo -e "${YELLOW}[~] Apt lock detected. Attempting to resolve automatically...$
 fi
 sudo killall -9 apt apt-get dpkg 2>/dev/null || true
 sudo rm -f /var/lib/apt/lists/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
-if ! timeout 120 sudo dpkg --configure -a; then
+if ! timeout 900 sudo dpkg --configure -a; then
 echo -e "${RED}[x] dpkg --configure -a failed.${NC}"
 echo -e "${YELLOW}[*] Try manually: sudo killall apt apt-get dpkg && sudo rm -f /var/lib/apt/lists/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend && sudo dpkg --configure -a${NC}"
 exit 1
