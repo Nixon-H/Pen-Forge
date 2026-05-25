@@ -458,18 +458,7 @@ Tools in Pen-Forge are defined in the `TOOLS_DB` associative array. Each entry f
 ["massdns"]="recon-enum|MassDNS|( rm -rf \"$HOME/build-temp/massdns\" && timeout $GIT_CLONE_TIMEOUT git clone --depth 1 https://github.com/blechschmidt/massdns.git \"$HOME/build-temp/massdns\" && cd \"$HOME/build-temp/massdns\" && make && sudo cp bin/massdns /usr/local/bin/ )|High-speed DNS resolver|Resolved IP addresses for domain lists"
 ```
 
-4. **Add to automated install section** (if applicable):
-
-   Locate the appropriate section in the `install_tools()` function:
-   - For Go tools: Around line 1100+ in "SECTION 3: Installing Go-based tools"
-   - For Python tools: Around line 1300+ in "SECTION 4: Installing Python tools"
-   - For Rust tools: Around line 1350+ in "SECTION 5: Installing Rust tools"
-   - For source builds: Around line 1400+ in "SECTION 6: Building tools from source"
-
-   Add your installation line:
-   ```bash
-   install_tool "YourTool" "yourtool" "go install github.com/user/yourtool@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-   ```
+4. **No further steps needed** — the `install_tools()` function now reads from `TOOLS_DB` automatically. Your tool will be picked up in the correct install phase (Go, Python, or binary/source) based on its install command.
 
 5. **Handle special binary names** (if needed):
 

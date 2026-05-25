@@ -22,6 +22,7 @@ declare -gA BINARY_NAME_MAP=(
 ["gxss"]="Gxss"
 ["uforall"]="UForAll"
 ["wcvs"]="Web-Cache-Vulnerability-Scanner"
+["getjs"]="GetJS"
 )
 menu_cleanup() {
 $CLEANUP_RUNNING && exit 0
@@ -214,7 +215,7 @@ declare -A TOOLS_DB=(
 ["subjs"]="js-analysis|Subjs|go install github.com/lc/subjs@latest|Extract subdomains from JavaScript|Referenced subdomains in JS code"
 ["linkfinder"]="js-analysis|LinkFinder|( command -v pip3 >/dev/null && rm -rf \"$HOME/build-temp/LinkFinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/GerbenJavado/LinkFinder.git \"$HOME/build-temp/LinkFinder\" && cd \"$HOME/build-temp/LinkFinder\" && pip3 install -r requirements.txt --break-system-packages && chmod +x linkfinder.py && sudo rm -f /usr/local/bin/linkfinder && sudo cp linkfinder.py /usr/local/bin/linkfinder )|Find endpoints in JavaScript|URLs and endpoints in JS code"
 ["xnlinkfinder"]="js-analysis|XnLinkFinder|pipx install xnLinkFinder|Find endpoints in various files|URLs and endpoints in JS and other files"
-["jshunter"]="js-analysis|Jshunter|go install github.com/cc1a2b/jshunter@latest|Hunt for secrets in JS files|API keys, tokens, sensitive data"
+["jshunter"]="js-analysis|Jshunter|go install github.com/cc1a2b/jshunter/cmd/jshunter@latest|Hunt for secrets in JS files|API keys, tokens, sensitive data"
 ["sourcemapper"]="js-analysis|Sourcemapper|go install github.com/denandz/sourcemapper@latest|Analyze JavaScript source maps|Original source code, hidden endpoints"
 ["s3scanner"]="cloud|S3Scanner|go install github.com/sa7mon/s3scanner@latest|Scan for open AWS S3 buckets|Public S3 buckets, accessible data"
 ["cdncheck"]="cloud|Cdncheck|go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest|Identify CDN and real IPs|CDN provider, potential WAF bypass"
@@ -1668,14 +1669,18 @@ pip3 uninstall -y "${PYTHON_PIP3_TOOLS[@]}" --break-system-packages &>> "$UNINST
 STOP_SPINNER
 echo "[+] Attempted to uninstall pip3 tools."
 fi
-msg "SECTION 5: Removing binaries & packages from source/other methods..."
-START_SPINNER "Removing binaries and source-installed packages"
-BINS_TO_REMOVE=(massdns urldedupe linkfinder rcert analyticsrelationships trufflehog xssrecon urlgrab pathfinder roboxtractor ssb aquatone ppfuzz x8 feroxbuster)
+msg "SECTION 5: Removing binaries & packages..."
+START_SPINNER "Removing binaries and installed packages"
+local BINS_TO_REMOVE=()
+for key in "${!TOOLS_DB[@]}"; do
+    BINS_TO_REMOVE+=("$key")
+done
 for bin_name in "${BINARY_NAME_MAP[@]}"; do BINS_TO_REMOVE+=("$bin_name"); done
 local unique_bins; unique_bins=$(printf "%s\n" "${BINS_TO_REMOVE[@]}" | sort -u)
 echo "$unique_bins" | while IFS= read -r bin_name; do
 if [[ -n "$bin_name" ]]; then
 sudo rm -f "/usr/local/bin/$bin_name" &>> "$UNINSTALL_LOG_FILE"
+sudo rm -f "$HOME/.local/bin/$bin_name" &>> "$UNINSTALL_LOG_FILE"
 sudo rm -f "$HOME/Tools/Go-Tools/bin/$bin_name" &>> "$UNINSTALL_LOG_FILE"
 fi
 done
