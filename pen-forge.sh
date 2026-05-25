@@ -166,13 +166,13 @@ declare -A TOOLS_DB=(
 ["ftpx"]="scanning|Ftpx|go install github.com/rix4uni/ftpx@latest|FTP vulnerability scanner|Anonymous FTP access, sensitive files"
 ["gowitness"]="scanning|Gowitness|go install github.com/sensepost/gowitness@latest|Website screenshotting tool|Visual recon via screenshots"
 ["portmap"]="scanning|Portmap|go install github.com/rix4uni/portmap@latest|Map open ports for a list of hosts|Open ports"
-["techx"]="scanning|Techx|go install github.com/rix4uni/techx@latest|Technology detection tool|Web technologies (frameworks, servers)"
+["techfinder"]="scanning|Techfinder|go install github.com/rix4uni/techfinder@latest|Technology detection tool|Web technologies (frameworks, servers)"
 ["x8"]="scanning|x8|set -e; wget https://github.com/Sh1Yo/x8/releases/download/v4.3.0/x86_64-linux-x8.gz -O /tmp/x8.gz; gunzip /tmp/x8.gz; chmod +x /tmp/x8; sudo mv /tmp/x8 /usr/local/bin/|Hidden parameter discovery|Bruteforce hidden parameters"
 ["gitleaks"]="secrets|Gitleaks|go install github.com/zricethezav/gitleaks/v8@latest|Scan git repos for secrets|Exposed secrets, API keys, tokens"
 ["trufflehog"]="secrets|Trufflehog|curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b \"$HOME/Tools/Go-Tools/bin\"|Scan for secrets in multiple sources|AWS keys, DB creds, tokens"
 ["cariddi"]="secrets|Cariddi|go install github.com/edoardottt/cariddi/cmd/cariddi@latest|Find sensitive data during crawling|Passwords, API keys, emails, paths"
 ["gitxpose"]="secrets|Gitxpose|go install github.com/rix4uni/gitxpose@latest|Enumerate .git repositories on a domain|Exposed .git directories"
-["goop"]="secrets|Goop|go install github.com/deletescape/goop@latest|Search for exposed .git directories|Exposed .git directories"
+["goop"]="secrets|Goop|go install github.com/nyancrimew/goop@latest|Search for exposed .git directories|Exposed .git directories"
 ["dotgit"]="secrets|Dotgit|pipx install dotgit|Extract .git repositories|Source code from exposed .git folders"
 ["hakcheckurl"]="auth-test|Hakcheckurl|go install github.com/hakluke/hakcheckurl@latest|Check URL validity and response codes|Valid endpoints, 401/403 auth issues"
 ["hakoriginfinder"]="auth-test|Hakoriginfinder|go install github.com/hakluke/hakoriginfinder@latest|Find origin servers behind WAFs|Real origin IPs, WAF bypass"
@@ -207,7 +207,7 @@ declare -A TOOLS_DB=(
 ["sublist3r"]="vuln-scan|Sublist3r|sudo apt-get install -y sublist3r|Subdomain enumeration tool|Subdomains from various search engines"
 ["getjs"]="js-analysis|GetJS|go install github.com/003random/getJS/v2@latest|Extract JavaScript files|All JS files, endpoints in code"
 ["jsfinder"]="js-analysis|Jsfinder|go install github.com/kacakb/jsfinder@latest|Find endpoints in JavaScript|API endpoints, hidden URLs from JS"
-["jsubfinder"]="js-analysis|Jsubfinder|go install github.com/ThreatUnkown/jsubfinder@latest|Find subdomains in JavaScript|Subdomains hardcoded in JS"
+["jsubfinder"]="js-analysis|Jsubfinder|go install github.com/ThreatUnknown/jsubfinder@latest|Find subdomains in JavaScript|Subdomains hardcoded in JS"
 ["jsluice"]="js-analysis|Jsluice|go install github.com/BishopFox/jsluice/cmd/jsluice@latest|Extract secrets from JavaScript|API endpoints, tokens, config data"
 ["subjs"]="js-analysis|Subjs|go install github.com/lc/subjs@latest|Extract subdomains from JavaScript|Referenced subdomains in JS code"
 ["linkfinder"]="js-analysis|LinkFinder|( command -v pip3 >/dev/null && rm -rf \"$HOME/build-temp/LinkFinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/GerbenJavado/LinkFinder.git \"$HOME/build-temp/LinkFinder\" && cd \"$HOME/build-temp/LinkFinder\" && pip3 install -r requirements.txt --break-system-packages && chmod +x linkfinder.py && sudo rm -f /usr/local/bin/linkfinder && sudo cp linkfinder.py /usr/local/bin/linkfinder )|Find endpoints in JavaScript|URLs and endpoints in JS code"
@@ -226,7 +226,7 @@ declare -A TOOLS_DB=(
 ["mapcidr"]="misc-util|Mapcidr|go install github.com/projectdiscovery/mapcidr/cmd/mapcidr@latest|CIDR and IP manipulation utility|IP ranges, CIDR blocks"
 ["tlsx"]="misc-util|Tlsx|go install github.com/projectdiscovery/tlsx/cmd/tlsx@latest|TLS swiss army knife|TLS versions, cipher suites, SANs"
 ["interlace"]="misc-util|Interlace|pipx install --force git+https://github.com/codingo/Interlace.git|Handle large target lists|Parallel command execution"
-["ssb"]="misc-util|Ssb|curl -sSfL 'https://git.io/kitabisa-ssb' | sudo sh -s -- -b /usr/local/bin|Screenshotting tool|Screenshots of web pages"
+["ssb"]="misc-util|Ssb|curl -sSfL 'https://raw.githubusercontent.com/kitabisa/ssb/master/.github/install.sh' | sudo sh -s -- -b /usr/local/bin|Screenshotting tool|Screenshots of web pages"
 ["rcert"]="misc-util|Rcert|( rm -rf \"$HOME/build-temp/rcert\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/rix4uni/rcert.git \"$HOME/build-temp/rcert\" && sudo mv \"$HOME/build-temp/rcert/rcert\" /usr/local/bin/ && sudo chmod +x /usr/local/bin/rcert )|Reverse certificate lookup|Domains sharing the same certificate"
 ["timelimitx"]="misc-util|Timelimitx|go install github.com/rix4uni/timelimitx@latest|Timeout wrapper for commands|Time-limited command execution"
 ["udon"]="misc-util|Udon|go install github.com/dhn/udon@latest|URL decoder/encoder|URL encoding/decoding"
@@ -934,152 +934,29 @@ go clean -cache -modcache &>/dev/null || true
 STOP_SPINNER
 printf "${GREEN}[+] Go module cache cleaned: %s seconds${NC}\n" "$TIME"
 TOOL_COUNTER=0
-install_tool "Amass" "amass" "go install github.com/owasp-amass/amass/v3/...@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Alterx" "alterx" "go install github.com/projectdiscovery/alterx/cmd/alterx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Anew" "anew" "go install github.com/tomnomnom/anew@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Assetfinder" "assetfinder" "go install github.com/tomnomnom/assetfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Asnmap" "asnmap" "go install github.com/projectdiscovery/asnmap/cmd/asnmap@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Cariddi" "cariddi" "go install github.com/edoardottt/cariddi/cmd/cariddi@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Cdncheck" "cdncheck" "go install github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Cero" "cero" "go install github.com/glebarez/cero@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Certinfo" "certinfo" "go install github.com/rix4uni/certinfo@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Chaos" "chaos" "go install github.com/projectdiscovery/chaos-client/cmd/chaos@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Crawley" "crawley" "go install github.com/s0rg/crawley/cmd/crawley@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Crobat" "crobat" "go install github.com/cgboal/sonarsearch/cmd/crobat@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Crlfuzz" "crlfuzz" "go install github.com/dwisiswant0/crlfuzz/cmd/crlfuzz@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Crt" "crt" "go install github.com/cemulus/crt@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Cspfinder" "cspfinder" "go install github.com/rix4uni/cspfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Csprecon" "csprecon" "go install github.com/edoardottt/csprecon/cmd/csprecon@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Cvemap" "cvemap" "go install github.com/projectdiscovery/cvemap/cmd/cvemap@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Dalfox" "dalfox" "go install github.com/hahwul/dalfox/v2@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Dlevel" "dlevel" "go install github.com/rix4uni/dlevel@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Dmut" "dmut" "go install github.com/bp0lr/dmut@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-if (( TOOL_COUNTER % 20 == 0 )); then go clean -cache -modcache &>/dev/null || true; fi
-install_tool "Dnsx" "dnsx" "go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Emailfinder" "emailfinder" "go install github.com/rix4uni/emailfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Favirecon" "favirecon" "go install github.com/edoardottt/favirecon/cmd/favirecon@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Favinfo" "favinfo" "go install github.com/rix4uni/favinfo@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Fff" "fff" "go install github.com/tomnomnom/fff@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Ffuf" "ffuf" "go install github.com/ffuf/ffuf/v2@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Ftpx" "ftpx" "go install github.com/rix4uni/ftpx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Fuzzuli" "fuzzuli" "go install github.com/musana/fuzzuli@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Galer" "galer" "go install github.com/dwisiswant0/galer@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gau" "gau" "go install github.com/lc/gau/v2/cmd/gau@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "GetJS" "getJS" "go install github.com/003random/getJS/v2@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gf" "gf" "go install github.com/tomnomnom/gf@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Github-endpoints" "github-endpoints" "go install github.com/gwen001/github-endpoints@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Github-subdomains" "github-subdomains" "go install github.com/gwen001/github-subdomains@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gitxpose" "gitxpose" "go install github.com/rix4uni/gitxpose@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gitleaks" "gitleaks" "go install github.com/zricethezav/gitleaks/v8@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gobuster" "gobuster" "go install github.com/OJ/gobuster/v3@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Goaltdns" "goaltdns" "go install github.com/subfinder/goaltdns@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Golinkfinder" "golinkfinder" "go install github.com/rix4uni/GoLinkFinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Goop" "goop" "go install github.com/deletescape/goop@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-if (( TOOL_COUNTER % 20 == 0 )); then go clean -cache -modcache &>/dev/null || true; fi
-install_tool "Gospider" "gospider" "go install github.com/jaeles-project/gospider@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gosqli" "gosqli" "go install github.com/rix4uni/gosqli@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gotator" "gotator" "go install github.com/Josue87/gotator@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gourlex" "gourlex" "go install github.com/trap-bytes/gourlex@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gowitness" "gowitness" "go install github.com/sensepost/gowitness@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gron" "gron" "go install github.com/tomnomnom/gron@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gungnir" "gungnir" "go install github.com/g0ldencybersec/gungnir/cmd/gungnir@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Gxss" "gxss" "go install github.com/KathanP19/Gxss@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Go-dork" "go-dork" "go install github.com/dwisiswant0/go-dork@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Hakcheckurl" "hakcheckurl" "go install github.com/hakluke/hakcheckurl@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Hakip2host" "hakip2host" "go install github.com/hakluke/hakip2host@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Haklistgen" "haklistgen" "go install github.com/hakluke/haklistgen@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Hakoriginfinder" "hakoriginfinder" "go install github.com/hakluke/hakoriginfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Hakrawler" "hakrawler" "go install github.com/hakluke/hakrawler@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Hakrevdns" "hakrevdns" "go install github.com/hakluke/hakrevdns@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Haktrails" "haktrails" "go install github.com/hakluke/haktrails@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Haktrailsfree" "haktrailsfree" "go install github.com/rix4uni/haktrailsfree@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Httpx" "httpx-toolkit" "go install github.com/projectdiscovery/httpx/cmd/httpx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Httprobe" "httprobe" "go install github.com/tomnomnom/httprobe@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Interactsh-client" "interactsh-client" "go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Ip2org" "ip2org" "go install github.com/rix4uni/ip2org@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-if (( TOOL_COUNTER % 20 == 0 )); then go clean -cache -modcache &>/dev/null || true; fi
-install_tool "Ipfinder" "ipfinder" "go install github.com/rix4uni/ipfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Jaeles" "jaeles" "go install github.com/jaeles-project/jaeles@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Jsfinder" "jsfinder" "go install github.com/kacakb/jsfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Jshunter" "jshunter" "go install github.com/cc1a2b/jshunter@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Jsluice" "jsluice" "go install github.com/BishopFox/jsluice/cmd/jsluice@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Jsubfinder" "jsubfinder" "go install github.com/ThreatUnkown/jsubfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Katana" "katana" "go install github.com/projectdiscovery/katana/cmd/katana@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Kxss" "kxss" "go install github.com/Emoe/kxss@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Linx" "linx" "go install github.com/riza/linx/cmd/linx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Linkinspector" "linkinspector" "go install github.com/rix4uni/linkinspector@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Mantra" "mantra" "go install github.com/Brosck/mantra@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Mapcidr" "mapcidr" "go install github.com/projectdiscovery/mapcidr/cmd/mapcidr@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Meg" "meg" "go install github.com/tomnomnom/meg@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Msarjun" "msarjun" "go install github.com/rix4uni/msarjun@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Mx-takeover" "mx-takeover" "go install github.com/musana/mx-takeover@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Naabu" "naabu" "go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Notify" "notify" "go install github.com/projectdiscovery/notify/cmd/notify@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Nuclei" "nuclei" "go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Oosexclude" "oosexclude" "go install github.com/rix4uni/oosexclude@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Org2asn" "org2asn" "go install github.com/rix4uni/org2asn@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-if (( TOOL_COUNTER % 20 == 0 )); then go clean -cache -modcache &>/dev/null || true; fi
-install_tool "Paramfinder" "paramfinder" "go install github.com/rix4uni/paramfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Pathcrawler" "pathcrawler" "go install github.com/rix4uni/pathcrawler@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Portmap" "portmap" "go install github.com/rix4uni/portmap@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Puredns" "puredns" "go install github.com/d3mondev/puredns/v2@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Pvreplace" "pvreplace" "go install github.com/rix4uni/pvreplace@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Proxify" "proxify" "go install github.com/projectdiscovery/proxify/cmd/proxify@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Qsreplace" "qsreplace" "go install github.com/tomnomnom/qsreplace@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Robotxt" "robotxt" "go install github.com/rix4uni/robotxt@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "S3scanner" "s3scanner" "go install github.com/sa7mon/s3scanner@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Shortscan" "shortscan" "go install github.com/bitquark/shortscan/cmd/shortscan@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Shosubgo" "shosubgo" "go install github.com/incogbyte/shosubgo@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Shuffledns" "shuffledns" "go install github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Smap" "smap" "go install github.com/s0md3v/smap/cmd/smap@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Sourcemapper" "sourcemapper" "go install github.com/denandz/sourcemapper@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Spk" "spk" "go install github.com/dhn/spk@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subdog" "subdog" "go install github.com/rix4uni/subdog@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subdomainfuzz" "subdomainfuzz" "go install github.com/rix4uni/subdomainfuzz@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subfinder" "subfinder" "go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subjs" "subjs" "go install github.com/lc/subjs@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subzy" "subzy" "go install github.com/PentestPad/subzy@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Subjack" "subjack" "go install github.com/haccer/subjack@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-if (( TOOL_COUNTER % 20 == 0 )); then go clean -cache -modcache &>/dev/null || true; fi
-install_tool "Techx" "techx" "go install github.com/rix4uni/techx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Timelimitx" "timelimitx" "go install github.com/rix4uni/timelimitx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Tldfinder" "tldfinder" "go install github.com/projectdiscovery/tldfinder/cmd/tldfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Tlsx" "tlsx" "go install github.com/projectdiscovery/tlsx/cmd/tlsx@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Udon" "udon" "go install github.com/dhn/udon@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Uforall" "uforall" "go install github.com/rix4uni/UForAll@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Uncover" "uncover" "go install github.com/projectdiscovery/uncover/cmd/uncover@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Unfurl" "unfurl" "go install github.com/tomnomnom/unfurl@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Urlfinder" "urlfinder" "go install github.com/projectdiscovery/urlfinder/cmd/urlfinder@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Waybackurls" "waybackurls" "go install github.com/tomnomnom/waybackurls@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Whoxysubs" "whoxysubs" "go install github.com/rix4uni/whoxysubs@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Wordgen" "wordgen" "go install github.com/rix4uni/wordgen@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "WCVS" "wcvs" "go install github.com/Hackmanit/Web-Cache-Vulnerability-Scanner@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Xcrawle3r" "xcrawl3r" "go install github.com/hueristiq/xcrawl3r/cmd/xcrawl3r@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Xsschecker" "xsschecker" "go install github.com/rix4uni/xsschecker@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Xsubfind3r" "xsubfind3r" "go install github.com/hueristiq/xsubfind3r/cmd/xsubfind3r@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
-install_tool "Xurlfind3r" "xurlfind3r" "go install github.com/hueristiq/xurlfind3r/cmd/xurlfind3r@latest" && TOOL_COUNTER=$((TOOL_COUNTER+1))
+for key in "${!TOOLS_DB[@]}"; do
+    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    if [[ "$cmd" == go\ install* ]]; then
+        install_tool "$display" "$key" "$cmd" && TOOL_COUNTER=$((TOOL_COUNTER+1))
+        if (( TOOL_COUNTER % 20 == 0 )); then
+            go clean -cache -modcache &>/dev/null || true
+        fi
+    fi
+done
 echo ""; echo "=================================================================="
 echo -e "${GREEN}[+] SECTION 4: Installing Python tools (pipx/pip3)...${NC}"
 echo "=================================================================="
-install_tool "Arjun" "arjun" "pipx install arjun"
-install_tool "Bbot" "bbot" "pipx install bbot"
-install_tool "Corscanner" "corscanner" "pipx install corscanner"
-install_tool "Dirsearch" "dirsearch" "pipx install dirsearch"
-install_tool "Dotgit" "dotgit" "pipx install dotgit"
-install_tool "Shodan" "shodan" "pipx install shodan"
-install_tool "Uro" "uro" "pipx install uro"
-install_tool "Waymore" "waymore" "pipx install waymore"
-install_tool "XnLinkFinder" "xnlinkfinder" "pipx install xnLinkFinder"
-install_tool "Altdns" "altdns" "pipx install --force git+https://github.com/infosec-au/altdns.git"
-install_tool "Interlace" "interlace" "pipx install --force git+https://github.com/codingo/Interlace.git"
-install_tool "Recollapse" "recollapse" "pipx install --force git+https://github.com/0xacb/recollapse.git"
-install_tool "Dnsgen" "dnsgen" "pip3 install dnsgen --break-system-packages"
-install_tool "Pler" "pler" "pip3 install python-pler --break-system-packages"
+for key in "${!TOOLS_DB[@]}"; do
+    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    if [[ "$cmd" == pipx* ]] || [[ "$cmd" == pip3* ]]; then
+        install_tool "$display" "$key" "$cmd"
+    fi
+done
 echo ""; echo "=================================================================="
 echo -e "${GREEN}[+] SECTION 5: Installing Rust and Rust-based tools...${NC}"
 echo "=================================================================="
 if ! command -v rustc &>/dev/null || [[ "$FORCE_UPDATE" == true ]]; then
-install_tool "Rust" "rustc" "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+    install_tool "Rust" "rustc" "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 else
 echo -e "${YELLOW}[~] Rust already installed. SKIPPED${NC}"
 fi
@@ -1087,27 +964,12 @@ if [ -f "$HOME/.cargo/env" ]; then
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 fi
-install_tool "Feroxbuster" "feroxbuster" 'set -e; wget https://github.com/epi052/feroxbuster/releases/latest/download/feroxbuster_amd64.deb.zip -O /tmp/ferox.zip; unzip -o /tmp/ferox.zip -d /tmp; sudo dpkg -i /tmp/feroxbuster*.deb; rm /tmp/ferox.zip /tmp/feroxbuster*.deb'
-install_tool "Ppfuzz" "ppfuzz" 'set -e; wget https://github.com/dwisiswant0/ppfuzz/releases/download/v1.0.2/ppfuzz-v1.0.2-x86_64-unknown-linux-musl.tar.gz -O /tmp/ppfuzz.tar.gz; tar -xzf /tmp/ppfuzz.tar.gz -C /tmp; sudo mv /tmp/ppfuzz /usr/local/bin/; rm /tmp/ppfuzz.tar.gz'
-install_tool "x8" "x8" 'set -e; wget https://github.com/Sh1Yo/x8/releases/download/v4.3.0/x86_64-linux-x8.gz -O /tmp/x8.gz; gunzip /tmp/x8.gz; chmod +x /tmp/x8; sudo mv /tmp/x8 /usr/local/bin/'
-install_tool "Ripgen" "ripgen" 'export PATH="$HOME/.cargo/bin:$PATH" && cargo install ripgen'
-echo ""; echo "=================================================================="
-echo -e "${GREEN}[+] SECTION 6: Building tools from source...${NC}"
-echo "=================================================================="
-install_tool "MassDNS" "massdns" "( rm -rf \"$HOME/build-temp/massdns\" && timeout $GIT_CLONE_TIMEOUT git clone --depth 1 https://github.com/blechschmidt/massdns.git \"$HOME/build-temp/massdns\" && cd \"$HOME/build-temp/massdns\" && make && sudo cp bin/massdns /usr/local/bin/ )" || :
-install_tool "AnalyticsRelationships" "analyticsrelationships" "( export GOPATH=\"$HOME/Tools/Go-Tools\" && rm -rf \"$HOME/build-temp/AnalyticsRelationships\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/Josue87/AnalyticsRelationships.git \"$HOME/build-temp/AnalyticsRelationships\" && cd \"$HOME/build-temp/AnalyticsRelationships\" && go mod tidy && go build -ldflags=\"-s\" -o \"$GOPATH/bin/analyticsrelationships\" )" || :
-install_tool "Pathfinder" "pathfinder" "( rm -rf \"$HOME/build-temp/pathfinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/Print3M/pathfinder.git \"$HOME/build-temp/pathfinder\" && cd \"$HOME/build-temp/pathfinder\" && go build && sudo mv pathfinder /usr/local/bin/ )" || :
-install_tool "Roboxtractor" "roboxtractor" "( rm -rf \"$HOME/build-temp/roboxtractor\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/Josue87/roboxtractor.git \"$HOME/build-temp/roboxtractor\" && cd \"$HOME/build-temp/roboxtractor\" && go build && sudo mv roboxtractor /usr/local/bin/ )" || :
-install_tool "Urlgrab" "urlgrab" "( rm -rf \"$HOME/build-temp/urlgrab\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/iamstoxe/urlgrab.git \"$HOME/build-temp/urlgrab\" && cd \"$HOME/build-temp/urlgrab\" && export GOPATH=\"$HOME/Tools/Go-Tools\" && go build -o \"$GOPATH/bin/urlgrab\" && chmod +x \"$GOPATH/bin/urlgrab\" )" || :
-install_tool "Xssrecon" "xssrecon" "( rm -rf \"$HOME/build-temp/xssrecon\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/rix4uni/xssrecon.git \"$HOME/build-temp/xssrecon\" && cd \"$HOME/build-temp/xssrecon\" && go install )" || :
-install_tool "UrlDedupe" "urldedupe" "( rm -rf \"$HOME/build-temp/urldedupe\" && timeout $GIT_CLONE_TIMEOUT git clone --depth 1 https://github.com/ameenmaali/urldedupe.git \"$HOME/build-temp/urldedupe\" && cd \"$HOME/build-temp/urldedupe\" && cmake CMakeLists.txt && make && sudo cp urldedupe /usr/local/bin/ )" || :
-install_tool "LinkFinder" "linkfinder" "( command -v pip3 >/dev/null && rm -rf \"$HOME/build-temp/LinkFinder\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/GerbenJavado/LinkFinder.git \"$HOME/build-temp/LinkFinder\" && cd \"$HOME/build-temp/LinkFinder\" && pip3 install -r requirements.txt --break-system-packages && chmod +x linkfinder.py && sudo rm -f /usr/local/bin/linkfinder && sudo cp linkfinder.py /usr/local/bin/linkfinder )" || :
-install_tool "Ghauri" "ghauri" "( command -v pip3 >/dev/null && rm -rf \"$HOME/build-temp/ghauri\" && timeout $GIT_CLONE_TIMEOUT git clone --depth 1 https://github.com/r0oth3x49/ghauri.git \"$HOME/build-temp/ghauri\" && cd \"$HOME/build-temp/ghauri\" && pip3 install -r requirements.txt --break-system-packages && pip3 install . --break-system-packages )" || :
-install_tool "Trufflehog" "trufflehog" 'curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b "$HOME/Tools/Go-Tools/bin"' || :
-install_tool "Aquatone" "aquatone" 'set -e; wget "https://github.com/michenriksen/aquatone/releases/download/v1.7.0/aquatone_linux_amd64_1.7.0.zip" -O /tmp/aquatone.zip; unzip -o /tmp/aquatone.zip -d /tmp; sudo mv /tmp/aquatone /usr/local/bin/; rm /tmp/aquatone.zip' || :
-install_tool "Ssb" "ssb" "curl -sSfL 'https://git.io/kitabisa-ssb' | sudo sh -s -- -b /usr/local/bin"
-install_tool "Rcert" "rcert" "( rm -rf \"$HOME/build-temp/rcert\" && timeout $GIT_CLONE_TIMEOUT git clone https://github.com/rix4uni/rcert.git \"$HOME/build-temp/rcert\" && sudo mv \"$HOME/build-temp/rcert/rcert\" /usr/local/bin/ && sudo chmod +x /usr/local/bin/rcert )" || :
-install_tool "WPScan" "wpscan" "if [ \"${OS_ID:-}\" == \"kali\" ]; then sudo apt-get install -y wpscan; elif command -v gem &>/dev/null; then sudo gem install wpscan; else echo \"Cannot install WPScan: gem not found\"; fi" || :
+for key in "${!TOOLS_DB[@]}"; do
+    IFS='|' read -r category display cmd desc long <<< "${TOOLS_DB[$key]}"
+    if [[ "$cmd" != go\ install* ]] && [[ "$cmd" != pipx* ]] && [[ "$cmd" != pip3* ]]; then
+        install_tool "$display" "$key" "$cmd" || :
+    fi
+done
 START_SPINNER "Cleaning up build directory"
 rm -rf "$HOME/build-temp" || true
 STOP_SPINNER
